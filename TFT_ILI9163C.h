@@ -612,30 +612,7 @@ class TFT_ILI9163C : public Print, public TftDmaInterface {
 		}
 
 		void writedata16_last(uint16_t d) __attribute__((always_inline)) {
-			if(!this->initDone){
-				uint32_t mcr = 0;
-				#if defined(__MK20DX128__) || defined(__MK20DX256__)|| defined(__MK66FX1M0__)
-					mcr = SPI0_MCR;
-					KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_EOQ;
-				#else
-					if (_useSPI == 0){
-						mcr = SPI0_MCR;
-						KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_EOQ;
-					} else if (_useSPI == 1){
-						mcr = SPI1_MCR;
-						KINETISK_SPI1.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_EOQ;
-					}
-				#endif
-				waitTransmitComplete(mcr);
-			}
-			else{
-				writeToBuffer(d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_CONT);
-			}
-			
-			//EDIT
-//			#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-//				disableCS();
-//			#endif
+			writeToBuffer(d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_CONT);
 		}
 
 /* --------------------------- ARM (XTENSA ESP8266) --------------------------------*/

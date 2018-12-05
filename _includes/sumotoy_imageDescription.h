@@ -6,6 +6,7 @@
 	#define __SUMOTOY_IMAGE_H
 	
 	#include <stdio.h>
+	#include <Arduino.h>
 	
 	#if defined(_FORCE_PROGMEM__)
 		typedef struct PROGMEM {

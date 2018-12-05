@@ -64,8 +64,8 @@ Default: (defaultFont = arial_2x)
 #define _ILI9163C_DEF_FONT_PATH			"_fonts/defaultFont.c"
 #define _ILI9163C_DEF_FONT_NAME			defaultFont
 ----------------------------------------------------------------------------------*/
-#define _ILI9163C_DEF_FONT_PATH			"_fonts/defaultFont.c"
-#define _ILI9163C_DEF_FONT_NAME			defaultFont
+#define _ILI9163C_DEF_FONT_PATH			"_fonts/newFont.c"
+#define _ILI9163C_DEF_FONT_NAME			newFont
 /*--------------------------------------------------------------------------------
 - Default Background Color & Default Foreground Color -
 When display turns on, it will set the defaul background and foreground.

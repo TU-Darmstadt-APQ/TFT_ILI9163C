@@ -50,18 +50,18 @@
 	#define TFT_ILI9163C_GAMMASET	3
 	/* Phisical display size
 	This is the real size in pixel of the display and nothing to do with chip RAM size. */
-	static const int16_t 	TFT_ILI9163C_W 		=		128;
-	static const int16_t 	TFT_ILI9163C_H 		=		128;
+	static const int16_t 	TFT_ILI9163C_W 		=		160;
+	static const int16_t 	TFT_ILI9163C_H 		=		160;
 	/* Memory Mapped display size
 	Display can be mapped trough it's 132*162 capacity, the following it's just
 	the ILI Ram affected by display, not the display resolution (that normally is 128*128!).
 	Since some display are mounted offsetted you need more ILI RAM when rotate or you will
 	see garbage in sides of the screen, here's where you set the ILI RAM */
-	static const int16_t  	TFT_ILI9163C_CGR_W 	=		128;//ILI memory map size W
+	static const int16_t  	TFT_ILI9163C_CGR_W 	=		160;//ILI memory map size W
 	static const int16_t  	TFT_ILI9163C_CGR_H 	=		160;//ILI memory map size H
 	/* Colorspace
 	Some display can use GBR colorspace or RGB (1:GBR - 0:RGB) */
-	static const boolean	TFT_ILI9163C_CSPACE 	= 	1;
+	static const boolean	TFT_ILI9163C_CSPACE 	= 	0;
 	/* Offset
 	Vendors like to set his display as they like, result in offset that is different between models
 	Here's a offset map for any rotatio of the display, helping code to deal with this.
@@ -69,8 +69,8 @@
 	static const uint8_t 	TFT_ILI9163C_OFST[4][2] = {
 		{0,0}, //rot 0 - x,y
 		{0,0}, //rot 1 - x,y
-		{0,32},//rot 2 - x,y
-		{32,0} //rot 3 - x,y
+		{0,0},//rot 2 - x,y
+		{0,0} //rot 3 - x,y
 	};
 	/* Rotation Compensation:
 	Some vendor mounted display upside-down or with a different rotation respect others.

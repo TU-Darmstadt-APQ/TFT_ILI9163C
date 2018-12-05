@@ -8,6 +8,10 @@ Null Font v2.4
 #define SUMO_FNT_LIB_nullfont
 
 #include <stdlib.h>
+#include "../_includes/TFT_ILI9163C_cpuCommons.h"
+#include "../_includes/sumotoy_fontDescription.h"
+#include "../_includes/sumotoy_imageDescription.h"
+#include "../_includes/sumotoy_iconDescription.h"
 
 
 

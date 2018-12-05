@@ -33,6 +33,10 @@
 #define SUMO_FNT_LIB_defaultFont
 
 #include <stdint.h>
+#include "../_includes/TFT_ILI9163C_cpuCommons.h"
+#include "../_includes/sumotoy_fontDescription.h"
+#include "../_includes/sumotoy_imageDescription.h"
+#include "../_includes/sumotoy_iconDescription.h"
 
 
 
@@ -240,17 +244,17 @@ PROGMEM
 #endif 
 = { image_data_defaultFont_0x30, 6, 6};//character: '0' (charW,total bytes)
 
-const _smCharType image_data_defaultFont_0x31[4] 
+const _smCharType image_data_defaultFont_0x31[5] 
 #if defined(_FORCE_PROGMEM__) 
 PROGMEM 
 #endif  
-= { 0x26, 0xa2, 0x22, 0x20 };//character: '1'
+= {  0x23, 0x28, 0x42, 0x10, 0x80 };//character: '1'
 
 const tImage defaultFont_0x31 
 #if defined(_FORCE_PROGMEM__) 
 PROGMEM 
 #endif 
-= { image_data_defaultFont_0x31, 4, 4};//character: '1' (charW,total bytes)
+= { image_data_defaultFont_0x31, 5, 5};//character: '1' (charW,total bytes)
 
 const _smCharType image_data_defaultFont_0x32[6] 
 #if defined(_FORCE_PROGMEM__) 

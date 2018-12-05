@@ -5,6 +5,7 @@
 #ifndef __SUMOTOY_FONTD_H
 	#define __SUMOTOY_FONTD_H
 	#include <stdio.h>
+	#include <Arduino.h>
 
 	#if defined(_FORCE_PROGMEM__)
 		typedef struct PROGMEM {//__PRGMTAG_

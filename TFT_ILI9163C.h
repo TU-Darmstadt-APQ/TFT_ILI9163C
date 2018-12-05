@@ -85,14 +85,15 @@
 #ifndef _TFT_ILI9163CLIB_H_
 #define _TFT_ILI9163CLIB_H_
 
-#include "Arduino.h"
+#include <Arduino.h>
 
 #include <limits.h>
-#include "pins_arduino.h"
-#include "wiring_private.h"
+#include <pins_arduino.h>
+#include <stdint.h> 
+#include <wiring_private.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "Print.h"
+#include <Print.h>
 #include <SPI.h>
 
 #include "_settings/TFT_ILI9163C_settings.h"
@@ -100,7 +101,10 @@
 #include "_settings/TFT_ILI9163C_colors.h"
 #include "_includes/TFT_ILI9163C_registers.h"
 
+#include "TFT_DMA_INTERFACE.h"
+
 //Load sumotoy universal descriptors (used in many other libraries)
+//#include "_includes/TFT_ILI9163C_cpuCommons.h"
 #include "_includes/sumotoy_fontDescription.h"
 #include "_includes/sumotoy_imageDescription.h"
 #include "_includes/sumotoy_iconDescription.h"
@@ -137,7 +141,7 @@ enum ILI9163C_iconMods { NONE=0,TRANSPARENT,REPLACE,BOTH};//0,1,2,3
 enum ILI9163C_centerMode { NORM=0,SCREEN,REL_X,REL_Y,REL_XY};//0,1,2,3,4
 
 #ifdef __cplusplus
-class TFT_ILI9163C : public Print {
+class TFT_ILI9163C : public Print, public TftDmaInterface {
 
  public:
 	#if defined (TFT_ILI9163C_INSTANCES)
@@ -256,6 +260,9 @@ class TFT_ILI9163C : public Print {
 	inline void 	Color565ToRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b){r = (((color & 0xF800) >> 11) * 527 + 23) >> 6; g = (((color & 0x07E0) >> 5) * 259 + 33) >> 6; b = ((color & 0x001F) * 527 + 23) >> 6;}
 	//void 			printPacket(word data,uint8_t count);
  protected:
+ 
+	bool initDone = false;
+ 
 	int16_t					_width, _height;
 	volatile int16_t		_cursorX, _cursorY;
 
@@ -497,7 +504,7 @@ class TFT_ILI9163C : public Print {
 				SPI.beginTransaction(_ILI9163CSPI);
 			#else
 				if (_useSPI == 0){
-					SPI.beginTransaction(_ILI9163CSPI);
+					//SPI.beginTransaction(_ILI9163CSPI);
 				} else if (_useSPI == 1){
 					SPI1.beginTransaction(_ILI9163CSPI);
 					digitalWriteFast(_cs,LOW);
@@ -511,7 +518,7 @@ class TFT_ILI9163C : public Print {
 				SPI.endTransaction();
 			#else
 				if (_useSPI == 0){
-					SPI.endTransaction();
+					//SPI.endTransaction();
 				} else if (_useSPI == 1){
 					SPI1.endTransaction();
 				}
@@ -585,102 +592,50 @@ class TFT_ILI9163C : public Print {
 		}
 
 		void writecommand_cont(const uint8_t c) __attribute__((always_inline)) {
-			#if defined(__MK20DX128__) || defined(__MK20DX256__)
-				KINETISK_SPI0.PUSHR = c | (pcs_command << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT;
-			#else
-				if (_useSPI == 0){
-					KINETISK_SPI0.PUSHR = c | (pcs_command << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT;
-				} else if (_useSPI == 1){
-					KINETISK_SPI1.PUSHR = c | (pcs_command << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT;
-				}
-			#endif
-			waitFifoNotFull();
+			writeToBuffer(c | (pcs_command << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT);
 		}
 
 		void writedata8_cont(uint8_t d) __attribute__((always_inline)) {
-			#if defined(__MK20DX128__) || defined(__MK20DX256__)
-				KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT;
-			#else
-				if (_useSPI == 0){
-					KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT;
-				} else if (_useSPI == 1){
-					KINETISK_SPI1.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT;
-				}
-			#endif
-			waitFifoNotFull();
+			writeToBuffer(d | (pcs_data << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT);
 		}
 
-		void writedata16_cont(uint16_t d) __attribute__((always_inline)) {
-			#if defined(__MK20DX128__) || defined(__MK20DX256__)
-				KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_CONT;
-			#else
-				if (_useSPI == 0){
-					KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_CONT;
-				} else if (_useSPI == 1){
-					KINETISK_SPI1.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_CONT;
-				}
-			#endif
-			waitFifoNotFull();
+		void writedata16_cont(uint16_t d) __attribute__((always_inline)) {	
+			writeToBuffer(d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_CONT);
 		}
 
 		void writecommand_last(const uint8_t c) __attribute__((always_inline)) {
-			uint32_t mcr = 0;
-			#if defined(__MK20DX128__) || defined(__MK20DX256__)
-				mcr = SPI0_MCR;
-				KINETISK_SPI0.PUSHR = c | (pcs_command << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_EOQ;
-			#else
-				if (_useSPI == 0){
-					mcr = SPI0_MCR;
-					KINETISK_SPI0.PUSHR = c | (pcs_command << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_EOQ;
-				} else if (_useSPI == 1){
-					mcr = SPI1_MCR;
-					KINETISK_SPI1.PUSHR = c | (pcs_command << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_EOQ;
-				}
-			#endif
-			waitTransmitComplete(mcr);
-			#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-				disableCS();
-			#endif
+			writeToBuffer(c | (pcs_command << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT);
 		}
 
 		void writedata8_last(uint8_t c) __attribute__((always_inline)) {
-			uint32_t mcr = 0;
-			#if defined(__MK20DX128__) || defined(__MK20DX256__)
-				mcr = SPI0_MCR;
-				KINETISK_SPI0.PUSHR = c | (pcs_data << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_EOQ;
-			#else
-				if (_useSPI == 0){
-					mcr = SPI0_MCR;
-					KINETISK_SPI0.PUSHR = c | (pcs_data << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_EOQ;
-				} else if (_useSPI == 1){
-					mcr = SPI1_MCR;
-					KINETISK_SPI1.PUSHR = c | (pcs_data << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_EOQ;
-				}
-			#endif
-			waitTransmitComplete(mcr);
-			#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-				disableCS();
-			#endif
+			writeToBuffer(c | (pcs_data << 16) | SPI_PUSHR_CTAS(0) | SPI_PUSHR_CONT);
 		}
 
 		void writedata16_last(uint16_t d) __attribute__((always_inline)) {
-			uint32_t mcr = 0;
-			#if defined(__MK20DX128__) || defined(__MK20DX256__)
-				 mcr = SPI0_MCR;
-				 KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_EOQ;
-			#else
-				if (_useSPI == 0){
+			if(!this->initDone){
+				uint32_t mcr = 0;
+				#if defined(__MK20DX128__) || defined(__MK20DX256__)|| defined(__MK66FX1M0__)
 					mcr = SPI0_MCR;
 					KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_EOQ;
-				} else if (_useSPI == 1){
-					mcr = SPI1_MCR;
-					KINETISK_SPI1.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_EOQ;
-				}
-			#endif
-			waitTransmitComplete(mcr);
-			#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-				disableCS();
-			#endif
+				#else
+					if (_useSPI == 0){
+						mcr = SPI0_MCR;
+						KINETISK_SPI0.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_EOQ;
+					} else if (_useSPI == 1){
+						mcr = SPI1_MCR;
+						KINETISK_SPI1.PUSHR = d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_EOQ;
+					}
+				#endif
+				waitTransmitComplete(mcr);
+			}
+			else{
+				writeToBuffer(d | (pcs_data << 16) | SPI_PUSHR_CTAS(1) | SPI_PUSHR_CONT);
+			}
+			
+			//EDIT
+//			#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
+//				disableCS();
+//			#endif
 		}
 
 /* --------------------------- ARM (XTENSA ESP8266) --------------------------------*/
@@ -811,7 +766,7 @@ class TFT_ILI9163C : public Print {
 			#else
 				disableCS();
 			#endif
-			endTransaction();
+			//endTransaction();
 		}
 	#endif
 

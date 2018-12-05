@@ -302,7 +302,12 @@ void TFT_ILI9163C::begin(bool avoidSPIinit)
 		_useSPI = 0;
 		SPI.setMOSI(_mosi);
 		SPI.setSCK(_sclk);
-		if (!avoidSPIinit) SPI.begin();
+		if (!avoidSPIinit) {SPI.begin();
+			SPI0_CTAR0 &= ~(0x11001);
+			SPI0_CTAR1 &= ~(0x11001);
+			SPI0_CTAR0 |= 1<<31;
+			SPI0_CTAR1 |= 1<<31;
+		}	
 		if (SPI.pinIsChipSelect(_cs, _dc)) {
 			pcs_data = SPI.setCS(_cs);
 			pcs_command = pcs_data | SPI.setCS(_dc);
@@ -382,11 +387,12 @@ void TFT_ILI9163C::begin(bool avoidSPIinit)
 			return;
 		}
 	#endif
-	startTransaction();
+	initDMA();
+	this->initDone = true;
 	//Software reset -------------------------
-	writecommand_cont(CMD_SWRESET); delay(122);//500
+	writecommand_cont(CMD_SWRESET); triggerDMA(); resetBuffer(); delay(122);//500
 	//Exit sleep -----------------------------
-	writecommand_cont(CMD_SLPOUT);  delay(5);
+	writecommand_cont(CMD_SLPOUT);  triggerDMA(); resetBuffer(); delay(5);
 	//Exit idle mode
 	writecommand_cont(CMD_IDLEOF); 
 	//Power Control 1 ------------------------
@@ -442,7 +448,7 @@ void TFT_ILI9163C::begin(bool avoidSPIinit)
 	//Normal Display ON
 	writecommand_cont(CMD_NORML);    
 	writecommand_last(CMD_DISPON); 
-	endTransaction();
+	triggerDMA(); resetBuffer();
 	delay(1);
 	//default screen rotation
 	setRotation(_ILI9163C_ROTATION);
@@ -450,8 +456,11 @@ void TFT_ILI9163C::begin(bool avoidSPIinit)
 	//scroll area (all screen)
 	//defineScrollArea(0,0);
 	setScrollDirection(0);//default
+	triggerDMA(); resetBuffer(); delay(100);
 	//Fill background with default color
 	fillScreen(_defaultBgColor);
+	triggerDMA(); resetBuffer(); delay(100);
+	
 	//Backlight ON
 	backlight(1);
 	//Now set Font

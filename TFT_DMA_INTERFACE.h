@@ -18,6 +18,14 @@ class TftDmaInterface {
 		this->transmitData.disableOnCompletion();
 	};
 	
+	void setSpiForTFT(){
+		SPI0_RSER |= 0b11<<24;
+		SPI0_CTAR0 &= ~(0x2031203);
+		SPI0_CTAR1 &= ~(0x2031203);
+		SPI0_CTAR0 |= 1<<31;
+		SPI0_CTAR1 |= 1<<31;
+	};
+	
 	
 	void resetBuffer(){
 		this->counter = 0;

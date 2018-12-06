@@ -38,7 +38,7 @@ class TftDmaInterface {
 	};
 	protected:
 		int32_t counter = 0;
-		DMAChannel transmitData = DMAChannel(3);
+		DMAChannel transmitData = DMAChannel(4);
 		const uint32_t SPI_RESUME_TRANSACTION = 0b1 << 28; 
 		const uint32_t SPI_END_TRANSACTION = 0b11 << 27;
 		uint32_t buffer[26000];

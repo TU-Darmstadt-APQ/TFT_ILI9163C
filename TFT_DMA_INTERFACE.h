@@ -19,11 +19,11 @@ class TftDmaInterface {
 	};
 	
 	void setSpiForTFT(){
-		SPI0_RSER |= 0b11<<24;
-		SPI0_CTAR0 &= ~(0x2031203);
-		SPI0_CTAR1 &= ~(0x2031203);
-		SPI0_CTAR0 |= 1<<31;
-		SPI0_CTAR1 |= 1<<31;
+		SPI0_RSER |= 0b11<<24; 			// Enable EOQ interrupt flag
+		SPI0_CTAR0 &= ~(0x2031203);			// Set maximum spi-clock and spi-mode 0
+		SPI0_CTAR1 &= ~(0x2031203);			// Set maxmimum spi-clock and spi-mode
+		SPI0_CTAR0 |= 1<<31;				// Enable double baudrate
+		SPI0_CTAR1 |= 1<<31;				// Enable double baudrate
 	};
 	
 	
@@ -34,8 +34,7 @@ class TftDmaInterface {
 	// This functions is called after the data that will be transmitted is written into the buffer
 	void triggerDMA(){
 		SPI0_SR |= (1<<28);
-		this->buffer[this->counter-1] |= 1 << 27; 		
-		//Serial.println(counter);		//EOQ bit in SPI0_PUSHR
+		this->buffer[this->counter-1] |= 1 << 27; 				//EOQ bit in SPI0_PUSHR		
 		this->transmitData.sourceBuffer(this->buffer,counter*4);
 		this->transmitData.enable();	
 	};

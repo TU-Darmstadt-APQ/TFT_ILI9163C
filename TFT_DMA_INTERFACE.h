@@ -33,10 +33,13 @@ class TftDmaInterface {
 	
 	// This functions is called after the data that will be transmitted is written into the buffer
 	void triggerDMA(){
-		SPI0_SR |= (1<<28);
-		this->buffer[this->counter-1] |= 1 << 27; 				//EOQ bit in SPI0_PUSHR		
-		this->transmitData.sourceBuffer(this->buffer,counter*4);
-		this->transmitData.enable();	
+		if(counter>0){
+			//if(counter>10000) Serial.println(counter);
+			SPI0_SR |= (1<<28);
+			this->buffer[this->counter-1] |= 1 << 27; 				//EOQ bit in SPI0_PUSHR		
+			this->transmitData.sourceBuffer(this->buffer,counter*4);
+			this->transmitData.enable();	
+		}
 	};
 	
 	void writeToBuffer(uint32_t d)__attribute__((always_inline)){
@@ -48,7 +51,7 @@ class TftDmaInterface {
 		DMAChannel transmitData = DMAChannel(4);
 		const uint32_t SPI_RESUME_TRANSACTION = 0b1 << 28; 
 		const uint32_t SPI_END_TRANSACTION = 0b11 << 27;
-		uint32_t buffer[26000];
+		uint32_t buffer[27000];
 };
 
 

@@ -36,22 +36,41 @@ class TftDmaInterface {
 		if(counter>0){
 			//if(counter>10000) Serial.println(counter);
 			SPI0_SR |= (1<<28);
-			this->buffer[this->counter-1] |= 1 << 27; 				//EOQ bit in SPI0_PUSHR		
-			this->transmitData.sourceBuffer(this->buffer,counter*4);
-			this->transmitData.enable();	
+			if(useBackupBuffer){
+				this->backupBuffer[this->counter-1] |= 1 << 27; 				//EOQ bit in SPI0_PUSHR		
+				this->transmitData.sourceBuffer(this->backupBuffer,counter*4);
+				this->transmitData.enable();
+				this->useBackupBuffer = false;
+			}
+			else{
+				this->buffer[this->counter-1] |= 1 << 27; 				//EOQ bit in SPI0_PUSHR		
+				this->transmitData.sourceBuffer(this->buffer,counter*4);
+				this->transmitData.enable();
+				this->useBackupBuffer = true;
+			}
 		}
 	};
 	
 	void writeToBuffer(uint32_t d)__attribute__((always_inline)){
-		this->buffer[this->counter] = d;
-		this->counter++;
+		if(useBackupBuffer){
+			this->backupBuffer[this->counter] = d;
+			this->counter++;
+		}
+		else{
+			this->buffer[this->counter] = d;
+			this->counter++;
+		}
+		
 	};
 	protected:
 		int32_t counter = 0;
+		bool useBackupBuffer = false;
 		DMAChannel transmitData = DMAChannel(4);
 		const uint32_t SPI_RESUME_TRANSACTION = 0b1 << 28; 
 		const uint32_t SPI_END_TRANSACTION = 0b11 << 27;
-		uint32_t buffer[27000];
+		uint32_t buffer[27500];
+		uint32_t backupBuffer[27500];
+		
 };
 
 

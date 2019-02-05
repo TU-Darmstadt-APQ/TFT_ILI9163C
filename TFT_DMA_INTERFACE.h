@@ -38,6 +38,7 @@ class TftDmaInterface {
 	
 	// This functions is called after the data that will be transmitted is written into the buffer
 	void triggerDMA()__attribute__((always_inline)){
+		
 		if(hugeRender){
 			this->hugePicture();
 		}
@@ -59,6 +60,7 @@ class TftDmaInterface {
 				}
 			}
 		}
+		this->counter = 0;
 	};
 	
 	void hugePicture()__attribute__((always_inline)){
@@ -114,8 +116,8 @@ class TftDmaInterface {
 		DMAChannel backupChannel = DMAChannel(5);
 		const uint32_t SPI_RESUME_TRANSACTION = 0b1 << 28; 
 		const uint32_t SPI_END_TRANSACTION = 0b11 << 27;
-		uint32_t buffer[27000];
-		uint32_t backupBuffer[27000];
+		uint32_t buffer[27500];
+		uint32_t backupBuffer[27500];
 		
 };
 

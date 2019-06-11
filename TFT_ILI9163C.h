@@ -155,7 +155,7 @@ class TFT_ILI9163C : public Print, public TftDmaInterface {
 	static uint8_t ILI9163C_instance;//used to keep track of the instances
 	#else
 		#if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
-			TFT_ILI9163C(const uint8_t cspin,const uint8_t dcpin,const uint8_t rstpin=255,const uint8_t mosi=11,const uint8_t sclk=13);
+			TFT_ILI9163C(const uint8_t cspin,const uint8_t dcpin,const uint8_t mosi=11,const uint8_t sclk=13);
 		#elif defined(__MKL26Z64__)
 			TFT_ILI9163C(const uint8_t cspin,const uint8_t dcpin,const uint8_t rstpin=255,const uint8_t mosi=11,const uint8_t sclk=13);
 		#else

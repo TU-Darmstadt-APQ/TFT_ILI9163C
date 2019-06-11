@@ -43,11 +43,11 @@
 	#endif
 #else
 	#if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) //Teensy 3.0, Teensy 3.1, Teensy 3.2
-	TFT_ILI9163C::TFT_ILI9163C(const uint8_t cspin,const uint8_t dcpin,const uint8_t rstpin,const uint8_t mosi,const uint8_t sclk)
+	TFT_ILI9163C::TFT_ILI9163C(const uint8_t cspin,const uint8_t dcpin,const uint8_t mosi,const uint8_t sclk)
 	{
 		_cs   = cspin;
 		_dc   = dcpin;
-		_rst  = rstpin;
+		//_rst  = rstpin;
 		_mosi = mosi;
 		_sclk = sclk;
 	}
@@ -297,7 +297,7 @@ void TFT_ILI9163C::begin(bool avoidSPIinit)
 		return;
 	}
 #elif defined(__MK64FX512__) || defined(__MK66FX1M0__)//Teensy 3.4 -> 3.5
-	if ((_mosi == 11 || _mosi == 7) && (_sclk == 13 || _sclk == 14)) {
+	if ((_mosi == 11 || _mosi == 7 || _mosi == 28) && (_sclk == 13 || _sclk == 14)) {
 		// ------------ SPI0 ---------------
 		_useSPI = 0;
 		SPI.setMOSI(_mosi);
@@ -387,12 +387,11 @@ void TFT_ILI9163C::begin(bool avoidSPIinit)
 			return;
 		}
 	#endif
-	initDMA();
-	this->initDone = true;
+	
 	//Software reset -------------------------
-	writecommand_cont(CMD_SWRESET); triggerDMA(); resetBuffer(); delay(122);//500
+	writecommand_cont(CMD_SWRESET); triggerDMA(); delay(122);//500
 	//Exit sleep -----------------------------
-	writecommand_cont(CMD_SLPOUT);  triggerDMA(); resetBuffer(); delay(5);
+	writecommand_cont(CMD_SLPOUT);  triggerDMA(); delay(5);
 	//Exit idle mode
 	writecommand_cont(CMD_IDLEOF); 
 	//Power Control 1 ------------------------
@@ -448,19 +447,13 @@ void TFT_ILI9163C::begin(bool avoidSPIinit)
 	//Normal Display ON
 	writecommand_cont(CMD_NORML);    
 	writecommand_last(CMD_DISPON); 
-	triggerDMA(); resetBuffer();
+	triggerDMA();
 	delay(1);
 	//default screen rotation
 	setRotation(_ILI9163C_ROTATION);
 	clearMemory();
-	//scroll area (all screen)
-	//defineScrollArea(0,0);
-	setScrollDirection(0);//default
-	triggerDMA(); resetBuffer(); delay(100);
-	//Fill background with default color
-	fillScreen(_defaultBgColor);
-	triggerDMA(); resetBuffer(); delay(100);
-	
+	triggerDMA();
+	delay(12);
 	//Backlight ON
 	backlight(1);
 	//Now set Font
@@ -469,7 +462,6 @@ void TFT_ILI9163C::begin(bool avoidSPIinit)
 	#else
 		setFont(&nullfont);
 	#endif
-	delay(30);
 }
 
 /*********************************************************
